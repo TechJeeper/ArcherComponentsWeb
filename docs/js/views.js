@@ -58,23 +58,19 @@ function renderConnect() {
   const ble = device.webBluetoothAvailable;
   return `<div class="connect-page">
     <div class="connect-page__panel">
-      <div class="connect-page__brand">
-        <div class="connect-page__logo">A</div>
-        <h1>Archer Components</h1>
-        <p>D1x Trail Configuration Tool</p>
+      <div class="connect-page__logo">A</div>
+      <h1>Archer D1x</h1>
+      <p class="connect-page__tagline">Shifter configuration</p>
+      <p class="connect-page__desc">Tune shift points, Quick Shift, auto-shutdown, and cassette profiles over Bluetooth.</p>
+      ${!ble ? '<div class="alert alert--warning">Web Bluetooth is not available. Use Chrome or Edge, or try Demo Mode.</div>' : ''}
+      <div id="connect-error"></div>
+      <div class="btn-grid">
+        ${ble ? '<button class="btn btn--primary" id="btn-connect">Connect to Shifter</button>' : ''}
+        <button class="btn btn--secondary" id="btn-demo">Try Demo Mode</button>
       </div>
-      <div class="connect-page__content">
-        <p class="connect-page__desc">Configure shift points, Quick Shift, auto-shutdown, and more for your Archer D1x electronic shifter.</p>
-        ${!ble ? '<div class="alert alert--warning">Web Bluetooth is not available. Use Chrome or Edge, or try Demo Mode.</div>' : ''}
-        <div id="connect-error"></div>
-        <div class="btn-grid">
-          ${ble ? '<button class="btn btn--primary" id="btn-connect">Connect to Shifter</button>' : ''}
-          <button class="btn btn--secondary" id="btn-demo">Try Demo Mode</button>
-        </div>
-        <div class="connect-page__chips">
-          <span class="chip">Chrome & Edge</span>
-          <span class="chip">Demo mode available</span>
-        </div>
+      <div class="connect-page__chips">
+        <span class="chip">Chrome & Edge</span>
+        <span class="chip">Demo mode</span>
       </div>
     </div>
   </div>`;
@@ -139,7 +135,7 @@ function renderSettings() {
     <a class="setting-row" href="#/settings/quick-shift"><span class="setting-row__label">Quick Shift</span><span class="setting-row__value">${device.getByte('QuickShiftState') === 1 ? 'ON' : 'OFF'} →</span></a>
     <a class="setting-row" href="#/settings/auto-shutdown"><span class="setting-row__label">Shutdown and Wake Up</span><span class="setting-row__value">${device.getByte('AutoShutDown')} min →</span></a>
     <a class="setting-row" href="#/settings/home-gear"><span class="setting-row__label">Get Me Home Gear</span><span class="setting-row__value">${device.getByte('HomeGear') > 0 ? 'ON' : 'OFF'} →</span></a>`
-    : '<p class="card__desc" style="color:#c00">Low Power Mode is ON — Get Me Home Gear and Auto Shutdown are disabled.</p>';
+    : '<p class="card__desc card__desc--warning">Low Power Mode is ON — Get Me Home Gear and Auto Shutdown are disabled.</p>';
 
   return layout('Settings', `
     <div class="card">
@@ -155,7 +151,7 @@ function renderSettings() {
       <a class="setting-row" href="#/settings/metrics"><span class="setting-row__label">Metrics</span><span>→</span></a>
       <a class="setting-row" href="#/settings/wheels"><span class="setting-row__label">Saved Wheel Library</span><span>→</span></a>
     </div>
-    ${fw ? `<div class="card"><p class="card__desc" style="margin:0">Firmware: ${fw}</p></div>` : ''}`);
+    ${fw ? `<div class="card"><p class="card__desc card__desc--flush">Firmware: ${fw}</p></div>` : ''}`);
 }
 
 function mountSettings(root) {
@@ -179,10 +175,10 @@ function renderQuickShift() {
   const down = device.getByte('QuickShiftDown');
   return layout('Quick Shift', `
     <div class="card"><div class="setting-row"><span>Quick Shift</span>${toggle(enabled, 'sw-qs')}</div></div>
-    <div class="card" style="opacity:${enabled ? 1 : 0.4}">
+    <div class="card${enabled ? '' : ' card--dimmed'}">
       <div class="slider-group"><label><span>Button Press Delay</span><span id="delay-val">${delay}ms</span></label>
         <input type="range" id="delay-slider" min="0" max="8" value="${progress}" ${enabled ? '' : 'disabled'}></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+      <div class="grid-2">
         <div><p class="card__title">Shift Up</p><div class="stepper"><button id="up-minus" ${!enabled || up <= 0 ? 'disabled' : ''}>−</button><span class="stepper__value">${up + 1}</span><button id="up-plus" ${!enabled || up >= 4 ? 'disabled' : ''}>+</button></div></div>
         <div><p class="card__title">Shift Down</p><div class="stepper"><button id="dn-minus" ${!enabled || down <= 0 ? 'disabled' : ''}>−</button><span class="stepper__value">${down + 1}</span><button id="dn-plus" ${!enabled || down >= 4 ? 'disabled' : ''}>+</button></div></div>
       </div>
@@ -221,7 +217,7 @@ function renderAutoShutdown() {
     <div class="card"><p class="card__desc">Tune the force required to wake the shifter after auto shutdown.</p>
       <div class="slider-group"><label><span>Wake Up Force</span><span id="wakeup-val">${wakeup}</span></label>
         <input type="range" id="wakeup-slider" min="5000" max="25000" value="${wakeup}">
-        <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#888"><span>Light</span><span>Hard</span></div>
+        <div class="slider-labels"><span>Light</span><span>Hard</span></div>
       </div>
     </div>` : '';
   return layout('Shutdown and Wake Up', `
@@ -260,7 +256,7 @@ function renderOvershoot() {
   return layout('Overshoot', `
     <div class="alert alert--warning">Overshoot makes the motor fly past each shift point and return after a delay. Test in a controlled environment first.</div>
     <div class="card"><div class="setting-row"><span>Enable Overshoot</span>${toggle(enabled, 'sw-os')}</div></div>
-    <div class="card" style="opacity:${enabled ? 1 : 0.4}">
+    <div class="card${enabled ? '' : ' card--dimmed'}">
       <p class="card__title">Shift Down</p>
       <div class="slider-group"><label><span>Distance</span><span>${dd}</span></label><input type="range" class="os-slider" data-key="OvershootDownDistance" data-step="${STEP_DISTANCE}" min="0" max="20" value="${dd / STEP_DISTANCE}" ${enabled ? '' : 'disabled'}></div>
       <div class="slider-group"><label><span>Delay</span><span>${ddel}ms</span></label><input type="range" class="os-slider" data-key="OvershootDownDelay" data-step="${STEP_DELAY}" min="0" max="40" value="${ddel / STEP_DELAY}" ${enabled ? '' : 'disabled'}></div>
@@ -336,11 +332,11 @@ function renderHomeGear() {
   }
   return layout('Get Me Home Gear', `
     <div class="card">${gearView(numGears, homeGear, 'lg')}
-      <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem">
-        <button class="btn btn--outline" id="gear-down" style="width:auto">▼ Down</button>
-        <button class="btn btn--outline" id="gear-up" style="width:auto">▲ Up</button>
+      <div class="btn-row text-center" style="margin-top:1rem">
+        <button class="btn btn--outline btn--compact" id="gear-down">▼ Down</button>
+        <button class="btn btn--outline btn--compact" id="gear-up">▲ Up</button>
       </div>
-      <p style="text-align:center;margin-top:0.5rem">Gear ${homeGear}</p>
+      <p class="text-center" style="margin-top:0.5rem">Gear ${homeGear}</p>
     </div>
     <button class="btn btn--ghost" id="btn-disable">Disable Get Me Home Gear</button>`);
 }
@@ -371,8 +367,8 @@ function renderManualShift() {
   const cur = device.getByte('CurrentGear', 1);
   return layout('Manual Shift', `
     <div class="card">${gearView(num, cur, 'lg')}
-      <p style="text-align:center;font-weight:700;margin-top:1rem">Gear ${cur} / ${num}</p>
-      <div style="display:flex;gap:0.5rem;margin-top:1rem">
+      <p class="text-center" style="font-weight:700;margin-top:1rem">Gear ${cur} / ${num}</p>
+      <div class="btn-row" style="margin-top:1rem">
         <button class="btn btn--secondary" id="gear-down" ${cur <= 1 ? 'disabled' : ''}>▼ Down</button>
         <button class="btn btn--secondary" id="gear-up" ${cur >= num ? 'disabled' : ''}>▲ Up</button>
       </div>
@@ -394,7 +390,7 @@ function mountManualShift(root) {
 function renderWheels() {
   const wheels = getWheels();
   const list = wheels.length === 0
-    ? '<p class="card__desc" style="text-align:center">No Saved Wheels</p>'
+    ? '<p class="card__desc text-center">No Saved Wheels</p>'
     : wheels.map((w) => `<div class="card"><p class="card__title">${w.name}</p><p class="card__desc">Gears: ${w.numGears}<br>Saved: ${new Date(w.date).toLocaleDateString()}</p>
         <button class="btn btn--outline btn-delete" data-id="${w.id}">Delete</button></div>`).join('');
   return layout('Saved Wheel Library', `${list}<button class="btn btn--primary" id="btn-save">Save Current Configuration</button>`);
@@ -427,10 +423,10 @@ function renderGearSelect() {
     <div class="alert alert--warning">Before you start, loosen your shift cable at the derailleur or take your chain off.</div>
     <div class="card"><p class="card__title">Number of Gears</p>
       ${gearView(num, 1, 'lg')}
-      <div class="stepper" style="justify-content:center;margin:1rem 0">
+      <div class="stepper stepper--center">
         <button id="gear-minus">−</button><span class="stepper__value" id="gear-count">${num}</span><button id="gear-plus">+</button>
       </div>
-      <p class="card__desc" style="text-align:center">${num}-speed cassette</p>
+      <p class="card__desc text-center">${num}-speed cassette</p>
     </div>
     <button class="btn btn--primary" id="btn-next">Next</button>`);
 }
@@ -469,7 +465,7 @@ function renderShiftConfig(mode) {
   const pwm = device.getShort('CurrentPWM', 1960);
   return layout('Shift Point Configuration', `
     <div class="alert alert--warning">Remove your chain or use a bike stand before moving the derailleur!</div>
-    <div class="card">${gearView(num, cur, 'lg')}<p style="text-align:center;font-weight:700">Gear ${cur} / ${num}</p></div>
+    <div class="card">${gearView(num, cur, 'lg')}<p class="text-center" style="font-weight:700">Gear ${cur} / ${num}</p></div>
     <div class="card"><p class="card__title">Position (PWM)</p>${pwmDisplay(pwm)}
       <div class="pwm-controls">
         <button class="btn btn--outline" data-pwm="-20" data-os="-15">−−</button>
@@ -479,7 +475,7 @@ function renderShiftConfig(mode) {
       </div>
     </div>
     <div class="card"><p class="card__title">Move Derailleur</p>
-      <div style="display:flex;gap:0.5rem">
+      <div class="btn-row">
         <button class="btn btn--secondary" id="gear-down" ${cur <= 1 ? 'disabled' : ''}>▼ Gear Down</button>
         <button class="btn btn--secondary" id="gear-up" ${cur >= num ? 'disabled' : ''}>▲ Gear Up</button>
       </div>
@@ -514,7 +510,7 @@ function mountShiftConfig(root) {
 }
 
 function renderInfo(title, desc, steps, actionLabel, onAction) {
-  const stepsHtml = steps ? `<ol style="padding-left:1.25rem;line-height:1.8;color:#555">${steps.map((s) => `<li>${s}</li>`).join('')}</ol>` : '';
+  const stepsHtml = steps ? `<ol class="info-steps">${steps.map((s) => `<li>${s}</li>`).join('')}</ol>` : '';
   return layout(title, `
     <div class="card"><p class="card__desc">${desc}</p>${stepsHtml}</div>
     <button class="btn btn--primary" id="btn-action">${actionLabel}</button>`);
