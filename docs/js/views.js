@@ -57,22 +57,24 @@ const mounts = {
 function renderConnect() {
   const ble = device.webBluetoothAvailable;
   return `<div class="connect-page">
-    <div class="connect-page__hero">
-      <div class="connect-page__logo">A</div>
-      <h1>Archer Components</h1>
-      <p>D1x Trail Configuration Tool</p>
-    </div>
-    <div class="connect-page__content">
-      <p class="connect-page__desc">Configure shift points, Quick Shift, auto-shutdown, and more for your Archer D1x electronic shifter.</p>
-      ${!ble ? '<div class="alert alert--warning">Web Bluetooth is not available. Use Chrome or Edge, or try Demo Mode.</div>' : ''}
-      <div id="connect-error"></div>
-      <div class="btn-grid">
-        ${ble ? '<button class="btn btn--primary" id="btn-connect">Connect to Shifter</button>' : ''}
-        <button class="btn btn--secondary" id="btn-demo">Try Demo Mode</button>
+    <div class="connect-page__panel">
+      <div class="connect-page__brand">
+        <div class="connect-page__logo">A</div>
+        <h1>Archer Components</h1>
+        <p>D1x Trail Configuration Tool</p>
       </div>
-      <div class="connect-page__note">
-        <h3>Requirements</h3>
-        <ul><li>Archer D1x shifter powered on</li><li>Chrome or Edge (Web Bluetooth)</li><li>HTTPS or GitHub Pages</li></ul>
+      <div class="connect-page__content">
+        <p class="connect-page__desc">Configure shift points, Quick Shift, auto-shutdown, and more for your Archer D1x electronic shifter.</p>
+        ${!ble ? '<div class="alert alert--warning">Web Bluetooth is not available. Use Chrome or Edge, or try Demo Mode.</div>' : ''}
+        <div id="connect-error"></div>
+        <div class="btn-grid">
+          ${ble ? '<button class="btn btn--primary" id="btn-connect">Connect to Shifter</button>' : ''}
+          <button class="btn btn--secondary" id="btn-demo">Try Demo Mode</button>
+        </div>
+        <div class="connect-page__chips">
+          <span class="chip">Chrome & Edge</span>
+          <span class="chip">Demo mode available</span>
+        </div>
       </div>
     </div>
   </div>`;
